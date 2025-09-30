@@ -1,7 +1,5 @@
 let tasks = [];
 
-
-
 function createTask({ title, description, priority }) {
     return {
         id: Date.now(),
