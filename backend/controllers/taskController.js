@@ -1,13 +1,100 @@
 import { tasks, createTask } from "../models/taskModel.js";
+import { formatTask } from "../utils/formatedTask.js";
 
-const getAllTasks = (req, res) => {};
+const getAllTasks = (req, res, next) => {
+    try {
+        if (!tasks || tasks.length === 0) {
+            const error = new Error("No tasks found");
+            error.status = 404;
+            throw error;
+        }
 
-const createNewTask = (req, res) => {};
+        res.status(200).json({
+            message: "Tasks sent successfully",
+            tasks: tasks.map(formatTask)
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 
-const updateTask = (req, res) => {};
+const createNewTask = (req, res, next) => {
+    try {
+        const { title, description, priority } = req.body;
 
-const toggleTaskStatus = (req, res) => {};
+        if (!title || !description) {
+            const error = new Error("Title and description are required");
+            error.status = 400;
+            throw error;
+        }
 
-const deleteTask = (req, res) => {};
+        if (priority && !["low", "medium", "high"].includes(priority)) {
+            const error = new Error(
+                "Priority must be only one of: low, medium, high"
+            );
+            error.status = 400;
+            throw error;
+        }
+
+        const newTask = createTask({ title, description, priority });
+        tasks.push(newTask);
+
+        res.status(201).json({
+            message: "Task created successfully",
+            task: formatTask(newTask)
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateTask = (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { title, description, priority } = req.body;
+
+        if (!title || !description) {
+            const error = new Error("Title and description are required");
+            error.status = 400;
+            throw error;
+        }
+
+        if (priority && !["low", "medium", "high"].includes(priority)) {
+            const error = new Error(
+                "Priority must be only one of: low, medium, high"
+            );
+            error.status = 400;
+            throw error;
+        }
+
+        const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
+
+        if (taskIndex === -1) {
+            const error = new Error("Task not found");
+            error.status = 404;
+            throw error;
+        }
+
+        const existingTask = tasks[taskIndex];
+
+        tasks.splice(taskIndex, 1, {
+            ...existingTask,
+            title,
+            description,
+            priority: priority || existingTask.priority
+        });
+
+        res.status(200).json({
+            message: "Task updated successfully",
+            taskUpdated: formatTask(tasks[taskIndex])
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const toggleTaskStatus = (req, res, next) => {};
+
+const deleteTask = (req, res, next) => {};
 
 export { getAllTasks, createNewTask, updateTask, toggleTaskStatus, deleteTask };
