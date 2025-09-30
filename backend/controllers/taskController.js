@@ -93,8 +93,59 @@ const updateTask = (req, res, next) => {
     }
 };
 
-const toggleTaskStatus = (req, res, next) => {};
+const toggleTaskStatus = (req, res, next) => {
+    try {
+        const { id } = req.params;
 
-const deleteTask = (req, res, next) => {};
+        const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
+
+        if (taskIndex === -1) {
+            const error = new Error("Task not found");
+            error.status = 404;
+            throw error;
+        }
+
+        tasks[taskIndex].completed = !tasks[taskIndex].completed;
+
+        const message = tasks[taskIndex].completed
+            ? "Task marked as completed"
+            : "Task marked as not completed";
+
+        res.status(200).json({
+            message,
+            taskUpdated: formatTask(tasks[taskIndex])
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const deleteTask = (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            const error = new Error("Task ID is required");
+            error.status = 400;
+            throw error;
+        }
+
+        const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
+
+        if (taskIndex === -1) {
+            const error = new Error("Task not found");
+            error.status = 404;
+            throw error;
+        }
+
+        tasks.splice(taskIndex, 1);
+
+        res.status(200).json({
+            message: "Task deleted successfully"
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export { getAllTasks, createNewTask, updateTask, toggleTaskStatus, deleteTask };
