@@ -1,4 +1,6 @@
-let tsks = [];
+let tasks = [];
+
+
 
 function createTask({ title, description, priority }) {
     return {
